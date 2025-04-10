@@ -1,0 +1,84 @@
+-- Create the OPERATOR table
+CREATE TABLE OPERATOR (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'user') NOT NULL,
+    unique_identifier VARCHAR(255) DEFAULT NULL,
+    preferences JSON DEFAULT NULL
+);
+
+-- Create the ITEM table
+CREATE TABLE ITEM (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL UNIQUE,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    short_description TEXT NOT NULL,
+    detailed_content TEXT NOT NULL,
+    main_image VARCHAR(255) NOT NULL,
+    additional_images TEXT DEFAULT NULL,
+    price DECIMAL(10, 2) DEFAULT NULL,
+    creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    creator_id INT NOT NULL,
+    CONSTRAINT fk_creator_id FOREIGN KEY (creator_id) REFERENCES OPERATOR(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Create the TAG table
+CREATE TABLE TAG (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT DEFAULT NULL
+);
+
+-- Create the ITEM_TAG table (N-N relationship between ITEM and TAG)
+CREATE TABLE ITEM_TAG (
+    item_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    PRIMARY KEY (item_id, tag_id),
+    CONSTRAINT fk_item_id FOREIGN KEY (item_id) REFERENCES ITEM(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_tag_id FOREIGN KEY (tag_id) REFERENCES TAG(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Create the MESSAGE table
+CREATE TABLE MESSAGE (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    send_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create the COLLECTION table
+CREATE TABLE COLLECTION (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    visitor_id INT NOT NULL,
+    CONSTRAINT fk_visitor_id FOREIGN KEY (visitor_id) REFERENCES OPERATOR(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Create the COLLECTION_ITEM table (N-N relationship between COLLECTION and ITEM)
+CREATE TABLE COLLECTION_ITEM (
+    collection_id INT NOT NULL,
+    item_id INT NOT NULL,
+    PRIMARY KEY (collection_id, item_id),
+    CONSTRAINT fk_collection_id FOREIGN KEY (collection_id) REFERENCES COLLECTION(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_collection_item_id FOREIGN KEY (item_id) REFERENCES ITEM(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Create the SEARCH table (optional for storing searches)
+CREATE TABLE SEARCH (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    visitor_id INT NOT NULL,
+    term VARCHAR(255) NOT NULL,
+    search_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_search_visitor_id FOREIGN KEY (visitor_id) REFERENCES OPERATOR(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
